@@ -1,0 +1,2 @@
+# Disturbot
+Thrivess discord bot
