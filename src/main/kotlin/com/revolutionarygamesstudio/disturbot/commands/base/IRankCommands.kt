@@ -2,7 +2,6 @@ package com.revolutionarygamesstudio.disturbot.commands.base
 
 import com.revolutionarygamesstudio.disturbot.common.obj.ClockedCommand
 import discord4j.core.`object`.entity.Member
-import discord4j.core.`object`.entity.channel.Channel
 import discord4j.core.`object`.entity.channel.MessageChannel
 
 /**
@@ -11,7 +10,7 @@ import discord4j.core.`object`.entity.channel.MessageChannel
  *
  * @author github.com/doomsdayrs
  */
-interface IRankCommands {
+interface IRankCommands : IClockExecutor {
     /**
      * Allows the user to view their current rank
      */

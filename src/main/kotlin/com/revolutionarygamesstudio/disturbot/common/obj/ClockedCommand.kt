@@ -11,6 +11,5 @@ package com.revolutionarygamesstudio.disturbot.common.obj
 @MustBeDocumented
 annotation class ClockedCommand(
     val aliases: Array<String>,
-    val description: String = "",
-    val privateOnly: Boolean = true
+    val description: String = ""
 )
