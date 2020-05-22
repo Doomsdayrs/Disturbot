@@ -39,7 +39,9 @@ dependencies {
     implementation("com.discord4j:discord4j-core:3.1.0.RC1")
 
     // Kodein
-    implementation("org.kodein.di:kodein-di-generic-jvm:6.5.0")
+    val kodeinVersion = "6.5.0"
+    implementation("org.kodein.di:kodein-di-generic-jvm:$kodeinVersion")
+    implementation("org.kodein.di:kodein-di-framework-tornadofx-jvm:$kodeinVersion")
 
     // tornadoFX
     implementation("no.tornado:tornadofx:1.7.20")

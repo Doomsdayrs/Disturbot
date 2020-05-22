@@ -2,10 +2,15 @@ package com.revolutionarygamesstudio.disturbot.handler.model
 
 import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
 import com.revolutionarygamesstudio.disturbot.common.consts.myID
+import com.revolutionarygamesstudio.disturbot.common.ext.logID
 import com.revolutionarygamesstudio.disturbot.common.obj.ClockedCommand
+import com.revolutionarygamesstudio.disturbot.common.utils.Log
 import com.revolutionarygamesstudio.disturbot.domain.SimpleCommand
 import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandler
+import discord4j.core.`object`.entity.Message
+import discord4j.core.`object`.entity.channel.MessageChannel
 import discord4j.core.event.domain.message.MessageCreateEvent
+import discord4j.discordjson.json.UserData
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberFunctions
@@ -25,15 +30,19 @@ class ClockedCommandHandler : IClockedCommandHandler {
     @ExperimentalStdlibApi
     override fun registerCommands(list: List<IClockExecutor>) {
         commands.clear()
+        Log.d(logID(),"Processing ${list.size} executor(s)")
         list.forEach { executor ->
+            Log.d(logID(), "Checking executor: ${executor.logID()}")
             executor::class.memberFunctions.filter { it.hasAnnotation<ClockedCommand>() }.forEach {
-                commands.add(SimpleCommand(it.findAnnotation()!!, it, executor))
+                val annotation = it.findAnnotation<ClockedCommand>()!!
+                Log.d(logID(), "Registering command: ${annotation.aliases.contentToString()}")
+                commands.add(SimpleCommand(annotation, it, executor))
             }
         }
     }
 
     override fun isMessageACommand(messageContent: String): Boolean {
-        println("Processing message $messageContent")
+        Log.i(logID(), "Processing message [$messageContent]")
 
         // Checks if the length is valid
         if (messageContent.length <= PREFIX_LEN) return false
@@ -92,13 +101,15 @@ class ClockedCommandHandler : IClockedCommandHandler {
                                 splitMessage[i]
                             } else null
                         }
-
+                        MessageCreateEvent::class -> event
+                        MessageChannel::class -> message.channel.block()
+                        Message::class -> message
+                        UserData::class -> message.userData
                         else -> null
                     }
                 )
             }
         }
-        TODO("Handle the command processor")
-        return arrayOf()
+        return arrayList.toTypedArray()
     }
 }

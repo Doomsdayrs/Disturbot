@@ -2,6 +2,8 @@ package com.revolutionarygamesstudio.disturbot.main
 
 import com.revolutionarygamesstudio.disturbot.BuildConfig
 import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
+import com.revolutionarygamesstudio.disturbot.common.ext.logID
+import com.revolutionarygamesstudio.disturbot.common.utils.Log
 import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandler
 import discord4j.core.DiscordClient
 import discord4j.core.GatewayDiscordClient
@@ -34,7 +36,8 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
      * Signals the beginning of the bot
      */
     @Throws(IOException::class)
-    fun startup() {
+    suspend fun startup() {
+        Log.i(logID(), "Hello, I have awakened")
         // Login to discord
         gateway = client.login().block() ?: throw IOException("Failure to login")
 
@@ -47,6 +50,7 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
      * Setups up command handling
      */
     fun watchUpdates() {
+        Log.d(logID(), "I am now watching")
         gateway?.on(MessageCreateEvent::class.java)?.asFlow()
             ?.filter { clockedCommandHandler.isMessageACommand(it.message.content) }?.let {
                 GlobalScope.launch(Dispatchers.IO) {
@@ -59,6 +63,7 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
      * Shuts the bot down
      */
     fun shutdown() {
+        Log.i(logID(), "It was a nice time helping!")
         gateway?.logout()?.block()
     }
 }
