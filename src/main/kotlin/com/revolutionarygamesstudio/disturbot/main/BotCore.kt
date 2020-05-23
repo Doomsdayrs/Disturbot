@@ -50,13 +50,13 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
      * Setups up command handling
      */
     fun watchUpdates() {
-        Log.d(logID(), "I am now watching")
+        Log.i(logID(), "I am now watching")
         gateway?.on(MessageCreateEvent::class.java)?.asFlow()
             ?.filter { clockedCommandHandler.isMessageACommand(it.message.content) }?.let {
                 GlobalScope.launch(Dispatchers.IO) {
                     it.collect { clockedCommandHandler.executeCommand(it) }
                 }
-            }
+            } ?: Log.d(logID(), "Message is not a command")
     }
 
     /**

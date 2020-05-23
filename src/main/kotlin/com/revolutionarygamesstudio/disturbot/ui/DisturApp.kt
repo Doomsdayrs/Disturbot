@@ -1,6 +1,5 @@
 package com.revolutionarygamesstudio.disturbot.ui
 
-import com.revolutionarygamesstudio.disturbot.di.commandExecutorsModule
 import com.revolutionarygamesstudio.disturbot.di.commandsModule
 import com.revolutionarygamesstudio.disturbot.di.databaseModule
 import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandler
@@ -31,7 +30,6 @@ class DisturApp : App(MainView::class), KodeinAware {
         bind<MainViewController>() with provider { MainViewController() }
         bind<IClockedCommandHandler>() with singleton { ClockedCommandHandler() }
 
-        import(commandExecutorsModule)
         import(commandsModule)
         import(databaseModule)
     }

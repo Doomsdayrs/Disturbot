@@ -7,7 +7,7 @@ package com.revolutionarygamesstudio.disturbot.common.obj
  * @author github.com/doomsdayrs
  */
 @Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
+@Retention
 @MustBeDocumented
 annotation class ClockedCommand(
     val aliases: Array<String>,
