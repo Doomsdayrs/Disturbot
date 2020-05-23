@@ -34,6 +34,7 @@ class ClockedCommandHandler : IClockedCommandHandler {
     @ExperimentalStdlibApi
     override fun registerCommands(list: List<IClockExecutor>) {
         commands.clear()
+        commandNotations.clear()
         Log.d(logID(), "Processing ${list.size} executor(s)")
         list.forEach { executor ->
             Log.d(logID(), "Checking executor: ${executor.logID()}")
@@ -109,13 +110,13 @@ class ClockedCommandHandler : IClockedCommandHandler {
         event: MessageCreateEvent
     ): Map<KParameter, Any?> {
         val hashMap = hashMapOf<KParameter, Any?>()
-        val method = command.method
-        val methodName = method.name
-        val params = method.parameters
         val message = event.message
-        var usedMessagePart = 1
 
         message.channel.block()?.let { channel ->
+            val method = command.method
+            val methodName = method.name
+            val params = method.parameters
+            var usedMessagePart = 1
             params.forEach { kParameter ->
                 Log.i(logID(), "$methodName requires param ${kParameter.index} of ${kParameter.type}")
                 if (kParameter.index == 0) {
