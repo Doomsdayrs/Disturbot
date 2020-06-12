@@ -13,4 +13,9 @@ interface IClockedCommandHandler {
     fun registerCommands(list: List<IClockExecutor>)
     fun isMessageACommand(messageContent: String): Boolean
     fun executeCommand(messageCreateEvent: MessageCreateEvent)
+
+    /**
+     * Instruction to clear commands, canceling all jobs
+     */
+    fun clearCommands()
 }

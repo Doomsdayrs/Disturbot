@@ -1,6 +1,5 @@
 package com.revolutionarygamesstudio.disturbot.commands.base
 
-import com.revolutionarygamesstudio.disturbot.common.obj.ClockedCommand
 import discord4j.core.`object`.entity.channel.MessageChannel
 
 /**

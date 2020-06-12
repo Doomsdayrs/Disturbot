@@ -3,6 +3,7 @@ package com.revolutionarygamesstudio.disturbot.main
 import com.revolutionarygamesstudio.disturbot.BuildConfig
 import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
 import com.revolutionarygamesstudio.disturbot.common.ext.logID
+import com.revolutionarygamesstudio.disturbot.common.obj.UniqueInt.getUniqueInt
 import com.revolutionarygamesstudio.disturbot.common.utils.Log
 import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandler
 import discord4j.core.DiscordClient
@@ -53,9 +54,12 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
         Log.i(logID(), "I am now watching")
         gateway?.on(MessageCreateEvent::class.java)?.asFlow()
             ?.filter { clockedCommandHandler.isMessageACommand(it.message.content) }?.let {
-                GlobalScope.launch(Dispatchers.IO) {
-                    it.collect { clockedCommandHandler.executeCommand(it) }
+                GlobalScope.launch(Dispatchers.Default) {
+                    it.collect {
+                        clockedCommandHandler.executeCommand(it)
+                    }
                 }
+
             } ?: Log.d(logID(), "Message is not a command")
     }
 
@@ -64,6 +68,7 @@ class BotCore(override val kodein: Kodein) : KodeinAware {
      */
     fun shutdown() {
         Log.i(logID(), "It was a nice time helping!")
+        clockedCommandHandler.clearCommands()
         gateway?.logout()?.block()
     }
 }

@@ -1,9 +1,10 @@
 package com.revolutionarygamesstudio.disturbot.handler.model
 
+import com.revolutionarygamesstudio.disturbot.commands.base.ClockedCommand
 import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
 import com.revolutionarygamesstudio.disturbot.common.consts.myID
 import com.revolutionarygamesstudio.disturbot.common.ext.logID
-import com.revolutionarygamesstudio.disturbot.common.obj.ClockedCommand
+import com.revolutionarygamesstudio.disturbot.common.obj.UniqueInt
 import com.revolutionarygamesstudio.disturbot.common.utils.Log
 import com.revolutionarygamesstudio.disturbot.domain.SimpleCommand
 import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandler
@@ -11,6 +12,8 @@ import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.channel.MessageChannel
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.discordjson.json.UserData
+import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
@@ -27,9 +30,28 @@ class ClockedCommandHandler : IClockedCommandHandler {
         private var messageCount = 0
     }
 
-    val commands = arrayListOf<SimpleCommand>()
+    private val commandPool = HashMap<Int, Pair<Long, Job>>()
+    private val commands = arrayListOf<SimpleCommand>()
+    private val commandNotations: MutableMap<Array<String>, String> = hashMapOf()
 
-    val commandNotations: MutableMap<Array<String>, String> = hashMapOf()
+    init {
+        GlobalScope.launch(Dispatchers.Default) {
+            while (true) {
+                commandPool.forEach { id, (time, job) ->
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - 300000 >= time) {
+                        job.cancel(CancellationException("Job $id has been running over 5 minutes"))
+                        commandPool.remove(id)
+                    }
+                }
+                try {
+                    TimeUnit.MINUTES.sleep(1)
+                } catch (e: InterruptedException) {
+                    Log.e(logID(), "Cannot sleep main cleaner")
+                }
+            }
+        }
+    }
 
     @ExperimentalStdlibApi
     override fun registerCommands(list: List<IClockExecutor>) {
@@ -93,8 +115,16 @@ class ClockedCommandHandler : IClockedCommandHandler {
             try {
                 val i = it.method.parameters.size
                 val received = getParameters(splitMessage, it, messageCreateEvent)
-                Log.d(logID(), "$i vs ${received.size}")
-                it.method.callBy(received)
+
+                val jobID = UniqueInt.getUniqueInt()
+                val job = GlobalScope.launch(Dispatchers.IO) {
+                    Log.d(logID(), "Executing ${it.method.name} $jobID")
+                    it.method.callBy(received)
+                }
+                job.invokeOnCompletion {
+                    Log.i(logID(), "Job $jobID complete")
+                }
+
             } catch (e: IllegalArgumentException) {
                 Log.e(logID(), "An exception occurred on attempt to call $commandName: ${e.message}")
             }
@@ -146,5 +176,13 @@ class ClockedCommandHandler : IClockedCommandHandler {
         }
         Log.d(logID(), "Size ${hashMap.size}")
         return hashMap
+    }
+
+
+    override fun clearCommands() {
+        commandPool.forEach { id, (time, job) ->
+            job.cancel(CancellationException("Clearing commands"))
+            commandPool.remove(id)
+        }
     }
 }
