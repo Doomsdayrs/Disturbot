@@ -37,13 +37,20 @@ class ClockedCommandHandler : IClockedCommandHandler {
     init {
         GlobalScope.launch(Dispatchers.Default) {
             while (true) {
+                val removeJobsAndCancel = arrayListOf<Int>()
+                val removeJobs = arrayListOf<Int>()
                 commandPool.forEach { id, (time, job) ->
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - 300000 >= time) {
-                        job.cancel(CancellationException("Job $id has been running over 5 minutes"))
-                        commandPool.remove(id)
-                    }
+                    if (job.isActive && (currentTime - 300000 >= time))
+                        removeJobsAndCancel.add(id)
+                    else if (job.isCompleted)
+                        removeJobs.add(id)
                 }
+                removeJobsAndCancel.forEach { id ->
+                    commandPool[id]?.second?.cancel(CancellationException("Job $id has been running over 5 minutes"))
+                    commandPool.remove(id)
+                }
+                removeJobs.forEach { commandPool.remove(it) }
                 try {
                     TimeUnit.MINUTES.sleep(1)
                 } catch (e: InterruptedException) {
@@ -181,8 +188,8 @@ class ClockedCommandHandler : IClockedCommandHandler {
 
     override fun clearCommands() {
         commandPool.forEach { id, (time, job) ->
-            job.cancel(CancellationException("Clearing commands"))
-            commandPool.remove(id)
+            job.cancel(CancellationException("Shutting down roleHandler"))
         }
+        commandPool.clear()
     }
 }
