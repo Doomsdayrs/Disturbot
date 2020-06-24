@@ -1,7 +1,7 @@
 package com.revolutionarygamesstudio.disturbot.domain
 
-import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
-import com.revolutionarygamesstudio.disturbot.commands.base.ClockedCommand
+import com.revolutionarygamesstudio.disturbot.commands.base.base.IClockExecutor
+import com.revolutionarygamesstudio.disturbot.commands.base.base.ClockedCommand
 import kotlin.reflect.KFunction
 
 /**

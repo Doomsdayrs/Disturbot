@@ -1,7 +1,7 @@
 package com.revolutionarygamesstudio.disturbot.handler.model
 
-import com.revolutionarygamesstudio.disturbot.commands.base.ClockedCommand
-import com.revolutionarygamesstudio.disturbot.commands.base.IClockExecutor
+import com.revolutionarygamesstudio.disturbot.commands.base.base.ClockedCommand
+import com.revolutionarygamesstudio.disturbot.commands.base.base.IClockExecutor
 import com.revolutionarygamesstudio.disturbot.common.consts.myID
 import com.revolutionarygamesstudio.disturbot.common.ext.logID
 import com.revolutionarygamesstudio.disturbot.common.obj.UniqueInt
@@ -102,6 +102,17 @@ class ClockedCommandHandler : IClockedCommandHandler {
         return true
     }
 
+    private fun Array<String>.contains(value: String, ignoreCase: Boolean): Boolean {
+        forEach {
+            if (it.equals(value, ignoreCase))
+                return true
+        }
+        return false
+    }
+
+    override fun getCommandByMessage(commandName: String): SimpleCommand? =
+        commands.find { it.annotation.aliases.contains(commandName, true) }
+
     override fun executeCommand(messageCreateEvent: MessageCreateEvent) {
         val message = messageCreateEvent.message
         val author = message.author.get()
@@ -115,10 +126,10 @@ class ClockedCommandHandler : IClockedCommandHandler {
             println("${author.id} = bot")
             return
         }
-
         val splitMessage = message.content.trim().split(" ")
         val commandName = splitMessage[0].removePrefix(PREFIX)
-        commands.find { it.annotation.aliases.contains(commandName) }?.let {
+
+        getCommandByMessage(commandName)?.let {
             try {
                 val i = it.method.parameters.size
                 val received = getParameters(splitMessage, it, messageCreateEvent)
@@ -135,8 +146,10 @@ class ClockedCommandHandler : IClockedCommandHandler {
             } catch (e: IllegalArgumentException) {
                 Log.e(logID(), "An exception occurred on attempt to call $commandName: ${e.message}")
             }
-        } ?: println("")
+        }
     }
+
+    override fun getCommands(): List<SimpleCommand> = commands
 
     /**
      * Returns a list of parameters for a function
@@ -175,6 +188,11 @@ class ClockedCommandHandler : IClockedCommandHandler {
                             if (kParameter.type.isMarkedNullable) null
                             else when (kParameter.type.toString()) {
                                 "discord4j.core.`object`.entity.channel.MessageChannel" -> channel
+                                "kotlin.String?" -> if (usedMessagePart < splitMessage.size) {
+                                    val i = usedMessagePart
+                                    usedMessagePart++
+                                    splitMessage[i]
+                                } else null
                                 else -> throw IllegalArgumentException("Cannot apply null for such")
                             }
                         }

@@ -1,4 +1,4 @@
-package com.revolutionarygamesstudio.disturbot.commands.base
+package com.revolutionarygamesstudio.disturbot.commands.base.base
 
 /**
  * disturbot

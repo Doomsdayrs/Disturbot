@@ -1,5 +1,6 @@
 package com.revolutionarygamesstudio.disturbot.commands.base
 
+import com.revolutionarygamesstudio.disturbot.commands.base.base.IClockExecutor
 import discord4j.core.`object`.entity.channel.MessageChannel
 
 /**

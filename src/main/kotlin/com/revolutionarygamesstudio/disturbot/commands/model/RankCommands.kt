@@ -1,7 +1,7 @@
 package com.revolutionarygamesstudio.disturbot.commands.model
 
 import com.revolutionarygamesstudio.disturbot.commands.base.IRankCommands
-import com.revolutionarygamesstudio.disturbot.commands.base.ClockedCommand
+import com.revolutionarygamesstudio.disturbot.commands.base.base.ClockedCommand
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.channel.MessageChannel
 

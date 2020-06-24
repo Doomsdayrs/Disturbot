@@ -8,7 +8,9 @@ import com.revolutionarygamesstudio.disturbot.handler.base.IClockedCommandHandle
 import com.revolutionarygamesstudio.disturbot.handler.model.ClockedCommandHandler
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
+import org.kodein.di.generic.instance
 import org.kodein.di.generic.provider
+import org.kodein.di.generic.singleton
 
 /**
  * disturbot
@@ -16,7 +18,7 @@ import org.kodein.di.generic.provider
  */
 
 val commandsModule = Kodein.Module("commands") {
-    bind<IClockedCommandHandler>() with provider { ClockedCommandHandler() }
+    bind<IClockedCommandHandler>() with singleton { ClockedCommandHandler() }
     bind<IRankCommands>() with provider { RankCommands() }
-    bind<IHelpCommand>() with provider { HelpCommand() }
+    bind<IHelpCommand>() with provider { HelpCommand(instance()) }
 }
